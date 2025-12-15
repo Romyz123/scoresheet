@@ -3,33 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talent Show Scoring Sheet</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Talent Show Results</title>
+    <link rel="stylesheet" href="style.css"> <style>
+        /* Add specific styles for the results page */
+        #results-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        #results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #results-table th, #results-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        #results-table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .rank-1 { background-color: gold; }
+        .rank-2 { background-color: silver; }
+        .rank-3 { background-color: #cd7f32; } /* Bronze */
+    </style>
 </head>
 <body>
     <header>
-        <h1>Judge's Scoring Dashboard</h1>
+        <h1>Official Talent Show Results</h1>
     </header>
 
-    <div class="container">
-        <div id="contestant-list">
-            <h2>Select Contestant</h2>
-            </div>
-
-        <div id="scoring-sheet" class="hidden">
-            <h2 id="contestant-name">Contestant Name/Number</h2>
-
-            <div id="criteria-scores">
-                </div>
-
-            <div class="total-score-box">
-                <p>TOTAL SCORE: <span id="final-total">0</span></p>
-                <p id="save-status">Status: Loading...</p>
-            </div>
-            
-        </div>
+    <div id="results-container">
+        <h2>Final Score Breakdown</h2>
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Group Name</th>
+                    <th>Total Score</th>
+                    </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
     </div>
 
-    <script src="script.js"></script>
-</body>
+    <script src="results.js"></script>
+    <script src="script.js"></script> </body>
 </html>
