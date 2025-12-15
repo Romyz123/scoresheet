@@ -97,3 +97,50 @@ header {
     font-weight: normal;
     color: #6c757d;
 }
+
+/* Add these new styles to your existing style.css */
+
+.criterion-block {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+.criterion-title {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #007bff; /* Use your brand color */
+}
+
+.radio-options {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap; /* Allows wrapping on small screens */
+}
+
+.radio-options input[type="radio"] {
+    /* Hide the default radio button */
+    display: none; 
+}
+
+.radio-options label {
+    cursor: pointer;
+    padding: 8px 15px;
+    border: 2px solid #ccc;
+    border-radius: 20px;
+    background-color: white;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+/* Style for the selected radio button */
+.radio-options input[type="radio"]:checked + label {
+    background-color: #28a745; /* Green for selected */
+    color: white;
+    border-color: #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+}
