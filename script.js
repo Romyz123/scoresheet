@@ -235,3 +235,20 @@ function clearAllScores() {
 
 document.addEventListener('DOMContentLoaded', calculateAndDisplayResults);
 
+// Function to export all data currently saved by this judge
+function exportMyScores() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (!data || data === '[]') {
+        alert("No scores recorded yet to export.");
+        return;
+    }
+    
+    // Copy data to clipboard
+    navigator.clipboard.writeText(data).then(() => {
+        alert("Your scores have been copied to your clipboard. Please paste this into the Admin Results Page.");
+    }).catch(err => {
+        console.error('Could not copy text: ', err);
+        alert("Could not automatically copy scores. Please check the console for the data.");
+    });
+}
+// IMPORTANT: This function must be accessible globally, so we define it outside the DOMContentLoaded
