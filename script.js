@@ -252,3 +252,236 @@ function exportMyScores() {
     });
 }
 // IMPORTANT: This function must be accessible globally, so we define it outside the DOMContentLoaded
+// --- ADMIN AND DATA MANAGEMENT ---
+const ADMIN_PASSWORD = "admin123"; // **CHANGE THIS TO A SECURE PASSWORD**
+const STORAGE_KEY_ADMIN = 'importedScoresAdminCache'; // New key for Admin data cache
+
+// All submissions aggregated from judges
+let globalSubmissions = [];
+let scoreChart; // Variable to hold the Chart.js instance
+
+function checkAdminPassword() {
+    const password = document.getElementById('admin-password').value;
+    if (password === ADMIN_PASSWORD) {
+        document.getElementById('admin-gate').style.display = 'none';
+        document.getElementById('results-dashboard').style.display = 'block';
+        loadAdminCache(); // Load any previously imported data
+    } else {
+        alert("Incorrect password.");
+    }
+}
+
+// Function to load imported data from a specific admin cache storage
+function loadAdminCache() {
+    const cachedData = localStorage.getItem(STORAGE_KEY_ADMIN);
+    if (cachedData) {
+        document.getElementById('imported-data-input').value = cachedData;
+        handleDataImport(); // Process the cached data
+    }
+}
+
+// The core function to handle pasted data from all judges
+function handleDataImport() {
+    const rawData = document.getElementById('imported-data-input').value;
+    
+    // Clear the global submissions array for fresh compilation
+    globalSubmissions = [];
+
+    // Process the data, assuming each judge's export is a valid JSON array or object
+    // and they might be pasted one after another.
+    
+    const potentialJSONs = rawData.split('][').join(',').replace(/^\[|\]$/g, '').split('},{');
+
+    potentialJSONs.forEach(part => {
+        if (!part.startsWith('{')) part = '{' + part;
+        if (!part.endsWith('}')) part = part + '}';
+        
+        try {
+            // Attempt to parse a single JSON object (if the user only pasted one score)
+            let submission = JSON.parse(part);
+            if (!Array.isArray(submission)) {
+                submission = [submission]; // Make it an array if it's a single object
+            }
+
+            submission.forEach(sub => {
+                if (sub.contestantId && sub.judgeName && sub.totalScore !== undefined) {
+                    globalSubmissions.push(sub);
+                }
+            });
+
+        } catch (e) {
+            // console.warn("Skipping invalid JSON block:", part);
+        }
+    });
+
+    // 2. Remove duplicate submissions (e.g., if a judge's data was pasted twice)
+    const uniqueSubmissions = [];
+    const seen = new Set();
+    globalSubmissions.forEach(sub => {
+        // Unique key based on who scored which contestant
+        const key = `${sub.judgeName}-${sub.contestantId}-${sub.totalScore}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueSubmissions.push(sub);
+        }
+    });
+
+    globalSubmissions = uniqueSubmissions;
+    
+    // Update the submission count and run calculations
+    document.getElementById('submission-count-processed').textContent = globalSubmissions.length;
+    
+    // Cache the raw pasted data
+    localStorage.setItem(STORAGE_KEY_ADMIN, rawData);
+    
+    calculateAndDisplayResults();
+}
+
+function clearAllData() {
+    if (confirm("This will clear ALL imported scores and the local Admin Cache. Continue?")) {
+        globalSubmissions = [];
+        localStorage.removeItem(STORAGE_KEY_ADMIN);
+        document.getElementById('imported-data-input').value = '';
+        calculateAndDisplayResults();
+        document.getElementById('submission-count-processed').textContent = '0';
+    }
+}
+
+// --- CALCULATION AND VISUALIZATION ---
+
+function calculateAndDisplayResults() {
+    const submissions = globalSubmissions;
+
+    if (submissions.length === 0) {
+        document.querySelector('#results-table tbody').innerHTML = '<tr><td colspan="5">No scores imported yet.</td></tr>';
+        if (scoreChart) scoreChart.destroy();
+        return;
+    }
+
+    // 1. Group submissions and calculate averages (same logic as before, but using globalSubmissions)
+    const aggregatedResults = CONTESTANTS.map(c => ({
+        id: c.id,
+        name: c.name,
+        scores: [],
+        talentScores: []
+    }));
+
+    submissions.forEach(sub => {
+        const team = aggregatedResults.find(a => a.id === sub.contestantId);
+        if (team) {
+            team.scores.push(sub.totalScore);
+            team.talentScores.push(sub.criteriaScores['Talent & Skill'] || 0); // Use the correct criteria name
+        }
+    });
+
+    // 2. Finalize aggregation and apply tie-breaker logic
+    const finalResults = aggregatedResults
+        .filter(a => a.scores.length > 0)
+        .map(team => {
+            const avgScore = team.scores.reduce((sum, score) => sum + score, 0) / team.scores.length;
+            const avgTalentScore = team.talentScores.reduce((sum, score) => sum + score, 0) / team.talentScores.length;
+            
+            return {
+                ...team,
+                avgScore: parseFloat(avgScore.toFixed(2)),
+                count: team.scores.length,
+                avgTalentScore: parseFloat(avgTalentScore.toFixed(2))
+            };
+        });
+
+    // 3. Sort (Primary: Avg Score, Secondary/Tie-breaker: Avg Talent Score)
+    finalResults.sort((a, b) => {
+        if (b.avgScore !== a.avgScore) {
+            return b.avgScore - a.avgScore;
+        }
+        return b.avgTalentScore - a.avgTalentScore;
+    });
+
+    // Assign rank
+    finalResults.forEach((result, index) => {
+        result.rank = index + 1;
+    });
+
+    // 4. Display Results in Table
+    const tableBody = document.querySelector('#results-table tbody');
+    tableBody.innerHTML = ''; 
+
+    finalResults.forEach(result => {
+        const row = tableBody.insertRow();
+        
+        if (result.rank === 1) row.classList.add('rank-1');
+        if (result.rank === 2) row.classList.add('rank-2');
+        if (result.rank === 3) row.classList.add('rank-3');
+        
+        row.insertCell().textContent = result.rank;
+        row.insertCell().textContent = result.name;
+        row.insertCell().textContent = result.avgScore;
+        row.insertCell().textContent = result.count;
+        row.insertCell().textContent = result.avgTalentScore;
+    });
+    
+    // 5. Render Bar Chart
+    renderBarChart(finalResults);
+}
+
+function renderBarChart(results) {
+    const ctx = document.getElementById('scoreBarChart').getContext('2d');
+    
+    // Prepare data for Chart.js (sorted by rank)
+    const labels = results.map(r => `${r.rank}. ${r.name}`);
+    const data = results.map(r => r.avgScore);
+    
+    // Destroy previous chart instance if it exists
+    if (scoreChart) {
+        scoreChart.destroy();
+    }
+    
+    scoreChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Average Score',
+                data: data,
+                backgroundColor: 'rgba(103, 58, 183, 0.8)', // Purple color
+                borderColor: 'rgba(103, 58, 183, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y', // Make it a horizontal bar chart
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Average Total Score (Max 100)'
+                    },
+                    max: 100 // Set max scale to 100
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Final Contestant Ranking by Average Score'
+                }
+            }
+        }
+    });
+}
+
+// Function to clear only the current judge's scores from their localStorage (index.html's data)
+function clearAllScores() {
+    if (confirm("This will permanently delete ALL saved scores for the CURRENT JUDGE from this browser. This does NOT affect the compiled Admin scores. Continue?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        alert("The current judge's local scores have been cleared.");
+    }
+}
+
+// Ensure the check is run if the page is visited directly without unlocking
+// document.addEventListener('DOMContentLoaded', () => { ... }); // This is now handled by the unlock button
