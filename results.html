@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Show Final Results</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Specific styles for the results table */
+        #results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        #results-table th, #results-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        #results-table th {
+            background-color: #673ab7;
+            color: white;
+            font-weight: bold;
+        }
+        .rank-1 { background-color: #ffc107; font-weight: bold; } /* Gold */
+        .rank-2 { background-color: #e9ecef; } /* Silver */
+        .rank-3 { background-color: #f8d7da; } /* Bronze */
+        
+        .score-count {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .action-buttons {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .action-buttons button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Official Talent Show Final Results</h1>
+    </header>
+
+    <div class="container">
+        <h2>Aggregated Scores</h2>
+        <p>Total Submissions Recorded: <span id="submission-count" class="score-count">0</span></p>
+        <p>Highest Average Score Rank (High to Low, Tie-broken by Talent & Skill Average Score):</p>
+        
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>Final Rank</th>
+                    <th>Group Name</th>
+                    <th>Average Score</th>
+                    <th>Total Submissions</th>
+                    <th>Avg Talent & Skill (Tie Breaker)</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        
+        <div class="action-buttons">
+            <button onclick="clearAllScores()">Clear All Scores (USE WITH CAUTION)</button>
+        </div>
+        
+        <div class="results-link">
+            <a href="index.html">Back to Scoring Sheet</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script> <script src="results.js"></script>
+</body>
+</html>
