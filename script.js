@@ -148,3 +148,90 @@ document.addEventListener('DOMContentLoaded', () => {
     // Attach the submission handler
     document.getElementById('scoring-form').addEventListener('submit', handleSubmit);
 });
+// --- RESULTS LOGIC ---
+
+function calculateAndDisplayResults() {
+    const submissions = loadSubmissions();
+    document.getElementById('submission-count').textContent = submissions.length;
+
+    if (submissions.length === 0) {
+        return;
+    }
+
+    // 1. Group submissions and calculate averages
+    const aggregatedResults = CONTESTANTS.map(c => ({
+        id: c.id,
+        name: c.name,
+        scores: [],
+        talentScores: []
+    }));
+
+    submissions.forEach(sub => {
+        const team = aggregatedResults.find(a => a.id === sub.contestantId);
+        if (team) {
+            team.scores.push(sub.totalScore);
+            // Collect the score for the tie-breaker criterion: 'Talent & Skill'
+            team.talentScores.push(sub.criteriaScores['Talent & Skill'] || 0);
+        }
+    });
+
+    // 2. Finalize aggregation (Calculate Averages)
+    const finalResults = aggregatedResults
+        .filter(a => a.scores.length > 0) // Only show teams that have been scored
+        .map(team => {
+            const avgScore = team.scores.reduce((sum, score) => sum + score, 0) / team.scores.length;
+            const avgTalentScore = team.talentScores.reduce((sum, score) => sum + score, 0) / team.talentScores.length;
+            
+            return {
+                ...team,
+                avgScore: parseFloat(avgScore.toFixed(2)),
+                count: team.scores.length,
+                avgTalentScore: parseFloat(avgTalentScore.toFixed(2))
+            };
+        });
+
+    // 3. Sort and Rank (with Tie Breaker)
+    finalResults.sort((a, b) => {
+        // Primary Sort: Average Score (High to Low)
+        if (b.avgScore !== a.avgScore) {
+            return b.avgScore - a.avgScore;
+        }
+        
+        // Tie Breaker: Average Talent & Skill Score (High to Low)
+        return b.avgTalentScore - a.avgTalentScore;
+    });
+
+    // Assign rank (No ties in rank number, as the sorting is deterministic)
+    finalResults.forEach((result, index) => {
+        result.rank = index + 1;
+    });
+
+    // 4. Display Results in Table
+    const tableBody = document.querySelector('#results-table tbody');
+    tableBody.innerHTML = '';
+
+    finalResults.forEach(result => {
+        const row = tableBody.insertRow();
+        
+        if (result.rank === 1) row.classList.add('rank-1');
+        if (result.rank === 2) row.classList.add('rank-2');
+        if (result.rank === 3) row.classList.add('rank-3');
+        
+        row.insertCell().textContent = result.rank;
+        row.insertCell().textContent = result.name;
+        row.insertCell().textContent = result.avgScore;
+        row.insertCell().textContent = result.count;
+        row.insertCell().textContent = result.avgTalentScore;
+    });
+}
+
+function clearAllScores() {
+    if (confirm("WARNING: This will permanently delete ALL saved scores for ALL judges from this browser. Are you sure?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        alert("All scores have been cleared.");
+        calculateAndDisplayResults(); // Refresh the table
+    }
+}
+
+document.addEventListener('DOMContentLoaded', calculateAndDisplayResults);
+
