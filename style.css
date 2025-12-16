@@ -1,146 +1,108 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    font-family: Roboto, Arial, sans-serif;
+    background-color: #f0f0f5; /* Light purple-grey background */
+    color: #202124; /* Dark grey text */
     margin: 0;
     padding: 0;
 }
 
 header {
-    background-color: #007bff;
+    background-color: #673ab7; /* Google Forms purple color */
     color: white;
-    padding: 20px;
+    padding: 24px;
     text-align: center;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
 .container {
-    display: flex;
-    max-width: 1200px;
-    margin: 20px auto;
-    gap: 20px;
-}
-
-#contestant-list {
-    flex: 1;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#contestant-list button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-#contestant-list button:hover, #contestant-list button.active {
-    background-color: #007bff;
-    color: white;
-}
-
-#scoring-sheet {
-    flex: 3;
-    background-color: white;
+    max-width: 700px;
+    margin: 30px auto;
     padding: 30px;
+    background-color: white;
+    border-top: 10px solid #673ab7;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.hidden {
-    display: none;
-}
-
-.criterion {
-    margin-bottom: 15px;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.criterion label {
-    font-weight: bold;
-    flex: 2;
-}
-
-.criterion input {
-    width: 80px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-align: center;
-}
-
-.total-score-box {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #e9ecef;
-    border-radius: 4px;
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-#final-total {
-    color: #28a745;
-}
-
-#save-status {
-    font-size: 0.8em;
-    font-weight: normal;
-    color: #6c757d;
-}
-
-/* Add these new styles to your existing style.css */
-
-.criterion-block {
+.question-block {
     margin-bottom: 25px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background-color: #fafafa;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.criterion-title {
+.required::after {
+    content: " *";
+    color: #d93025; /* Red asterisk */
+}
+
+/* Input Fields */
+input[type="text"], select {
+    width: 100%;
+    padding: 10px 0;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    font-size: 16px;
+    margin-top: 5px;
+    transition: border-bottom-color 0.3s;
+}
+input[type="text"]:focus, select:focus {
+    outline: none;
+    border-bottom-color: #673ab7;
+}
+
+/* Criteria Styles (Radio Buttons) */
+.criteria-block {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.criteria-title {
     display: block;
     font-weight: bold;
-    font-size: 1.1em;
     margin-bottom: 15px;
-    color: #007bff; /* Use your brand color */
 }
 
 .radio-options {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap; /* Allows wrapping on small screens */
+    display: block; /* Stack radio options vertically */
 }
 
 .radio-options input[type="radio"] {
-    /* Hide the default radio button */
-    display: none; 
+    margin-right: 10px;
 }
 
 .radio-options label {
+    display: block;
+    padding: 8px 0;
     cursor: pointer;
-    padding: 8px 15px;
-    border: 2px solid #ccc;
-    border-radius: 20px;
-    background-color: white;
-    transition: all 0.2s;
-    font-weight: 600;
 }
 
-/* Style for the selected radio button */
-.radio-options input[type="radio"]:checked + label {
-    background-color: #28a745; /* Green for selected */
+/* Submit Button */
+.submit-button {
+    background-color: #673ab7;
     color: white;
-    border-color: #28a745;
-    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+    padding: 10px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    float: right;
+    margin-top: 10px;
+}
+
+.status-message {
+    color: #888;
+    font-size: 0.8em;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.results-link {
+    clear: both;
+    margin-top: 40px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
 }
